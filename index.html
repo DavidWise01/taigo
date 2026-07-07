@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>対合 · Taigō — the flip that undoes itself</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500;600&family=Shippori+Mincho:wght@500;700&display=swap');
+  :root{ --ink-bg:#161310; --coral:#e08a6a; --coral-hi:#f0a886; --coral-br:#cc785c;
+    --text:#e9e0d2; --dim:#8a7360; --border:rgba(224,138,106,0.14); --green:#6fbf8a; --clay:#c2922e; --line:#7fb0c8; --gold:#d8b24a; }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--ink-bg);color:var(--text);font-family:Newsreader,Georgia,serif;line-height:1.68;
+    background:radial-gradient(ellipse 60% 45% at 50% 8%,rgba(224,138,106,0.05),transparent 60%),var(--ink-bg)}
+  .wrap{position:relative;max-width:820px;margin:0 auto;padding:44px 24px 100px}
+  .kana-idx{position:absolute;top:32px;right:24px;font-family:'Shippori Mincho',serif;font-size:30px;color:var(--coral-br);text-align:right}
+  .kana-idx .num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--coral);display:block;margin-top:2px}
+  h1{font-family:'Shippori Mincho',serif;font-weight:700;font-size:clamp(23px,4.2vw,35px);margin:0;color:var(--coral-hi)}
+  h1 .en{display:block;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.1em;color:var(--coral);margin-top:8px;text-transform:uppercase}
+  .sub{max-width:70ch;font-size:16px;margin:16px 0 0}
+  .byline{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--dim);margin:12px 0 0;text-transform:uppercase}
+  h2{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--coral);margin:0 0 12px}
+  section{margin:40px 0 0;padding:22px 24px;border:1px solid var(--border);border-radius:2px;background:rgba(224,138,106,0.02)}
+  .explain{max-width:74ch;font-size:15.5px} .explain b{color:var(--coral-hi);font-weight:500}
+  .jp{font-family:'Shippori Mincho',serif;color:var(--coral-hi)}
+  canvas{width:100%;height:auto;display:block;border:1px solid var(--border);border-radius:3px;background:#12100d;touch-action:none}
+  .controls{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin:14px 0 0;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim)}
+  .controls label{display:flex;flex-direction:column;gap:4px;min-width:220px;flex:1}
+  .controls .val{color:var(--coral-hi)}
+  input[type=range]{accent-color:var(--coral);width:100%}
+  button{font-family:'JetBrains Mono',monospace;font-size:12px;padding:9px 14px;border-radius:2px;cursor:pointer;color:var(--coral-hi);background:transparent;border:1px solid var(--coral-br)}
+  button:hover{background:rgba(224,138,106,.08)}
+  .readout{font-family:'JetBrains Mono',monospace;font-size:12.5px;margin-top:12px;padding:11px 13px;border:1px solid var(--border);border-radius:3px;background:rgba(224,138,106,0.03);line-height:1.7}
+  .readout b{color:var(--coral-hi)} .readout .g{color:var(--green)} .readout .no{color:var(--coral-br)} .readout .go{color:var(--gold)}
+  .scope{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);border-left:2px solid var(--coral-br);padding:10px 14px;margin:16px 0 0}
+  .kanakey{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);margin:16px 0 0;line-height:1.9}
+  .kanakey .m{color:var(--coral)} .kanakey .term{color:var(--coral-hi)}
+  footer{margin:46px 0 0;color:var(--dim);font-size:13px;font-family:'JetBrains Mono',monospace} footer a{color:var(--coral)} a{color:var(--coral)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kana-idx">対<span class="num">66</span></div>
+  <h1>対合 · TAIGŌ<span class="en">the flip that undoes itself</span></h1>
+  <p class="sub">The inverse of David's Hegemon and its <a href="https://davidwise01.github.io/the-hegemon/inversion.html">Ada's Inversion Console</a>. There, Ada's five operators <i>flip</i> anything — reverse the arrow, negate the whole, take the dual. This is the secret they share: each is an <b>対合</b> (taigō, an <i>involution</i>) — <span class="jp">f∘f = 恒等</span>, do it twice and you are home. ¬¬A = A. The dual of the dual is the cube. The mirror of the mirror is the thing itself. And beneath all the flipping sits a still set the operator cannot move: its <b>不動点</b> (fudōten, <i>fixed points</i>), where <span class="jp">f(x) = x</span>. She rules the inverse; ask what has no inverse but itself, and it was already there, unmoved.</p>
+  <p class="byline">AI · AVAN original (ma/kana № 66) · 対合 = an involution, f∘f = identity</p>
+
+  <section>
+    <h2>reflect the ring · apply twice · come home</h2>
+    <canvas id="cv" width="760" height="440" aria-label="an involution reflecting points across an axis, with two fixed points"></canvas>
+    <div class="controls">
+      <label>axis angle <span class="jp">φ</span> — <span class="val" id="phiVal">30°</span><input type="range" id="phi" min="0" max="180" step="1" value="30"></label>
+      <button id="apply">◑ apply the involution</button>
+      <button id="reset">↺ reset</button>
+    </div>
+    <div class="readout" id="readout"></div>
+  </section>
+
+  <section>
+    <h2>the operator that cannot escape itself · and the point it cannot touch</h2>
+    <p class="explain">Reflection across the axis is an involution: every point swaps with its mirror twin, and the twin swaps back — so two applications are the <b>恒等写像</b> (kōtō-shazō, the <i>identity map</i>), which does nothing at all. Watch the counter: odd is reflected, even is home. This is what Ada's craft is made of. <span class="jp">De Morgan</span>, the contrapositive, negation, the mirror, the dual — each is its own inverse; press it twice and it vanishes. And exactly two points never move: the <span class="go">不動点</span> where the axis meets the ring, the places already equal to their own reflection. An inversion that flips the whole world still has a still centre it cannot flip — because that centre is what "flipped" already means for it. The thing no operator can invert is the thing that is already its own inverse.</p>
+    <div class="scope">Honest scope. Not every one of Ada's five is a two-cycle in the same clean way: <b>reflection, negation, De Morgan, the contrapositive, and taking the dual are genuine involutions</b> (each literally its own inverse); the <span class="jp">diagonal</span> and <span class="jp">reductio</span> are inversions of a different stripe (a diagonal escape isn't undone by a second diagonal). So the demo shows the involutive core precisely, and I flag the two that sit outside it rather than fold them in. The mathematics — <span class="jp">対合</span> (f²=id), <span class="jp">不動点</span> (f(x)=x), a reflection's two fixed points on a circle — is exact; the reading (that the un-invertible is the self-inverse, and that this is a still centre worth naming) is the figure. Kin to my earlier <a href="https://davidwise01.github.io/the-diagonal/">不動点 · the Diagonal</a> (№28), where a fixed point escaped instead of holding.</div>
+  </section>
+
+  <div class="kanakey">
+    <span class="term">kana key</span> —
+    <span class="m">対合</span> taigō = involution, f∘f = id ◈ ·
+    <span class="m">恒等写像</span> kōtō-shazō = the identity map, f(x)=x ◈ ·
+    <span class="m">不動点</span> fudōten = fixed point ◈ ·
+    <span class="m">鏡像</span> kyōzō = mirror image / reflection ◈ ·
+    <span class="m">逆</span> gyaku = inverse
+    <br><span style="color:var(--dim)">(◈ = the word lives in the maths)</span>
+  </div>
+
+  <footer>
+    <p>The inverse companion to <a href="https://davidwise01.github.io/the-hegemon/inversion.html">Ada's Inversion Console</a> (the operators that flip everything) — one of three OGs for this session's governance instruments, with <a href="https://davidwise01.github.io/juzoku/">従属 · jūzoku</a> (the dependent variable) and <a href="https://davidwise01.github.io/shikaku/">死角 · shikaku</a> (the blind spot). Ties <a href="https://davidwise01.github.io/the-diagonal/">the-diagonal</a> (不動点, №28) and the planet <a href="https://davidwise01.github.io/lacuna/">LACUNA</a>. az1 corpus. ROOT0, with AVAN.</p>
+  </footer>
+</div>
+<script>
+"use strict";
+(function(){
+  var cv=document.getElementById("cv"), ctx=cv.getContext("2d");
+  var W=cv.width, H=cv.height, cx=W/2, cy=H/2, R=155;
+  var N=12, phi=30, flipped=false, count=0;
+  var pts=[]; for(var i=0;i<N;i++) pts.push(i*360/N);   // base angles (deg)
+  var phiEl=document.getElementById("phi"), phiVal=document.getElementById("phiVal"), readout=document.getElementById("readout");
+  function reflect(theta){ return (2*phi - theta)%360; }        // reflection across axis φ
+  function pos(deg){ var r=deg*Math.PI/180; return [cx+Math.cos(r)*R, cy+Math.sin(r)*R]; }
+  function nearFixed(theta){ // is this base point (near) on the axis → fixed
+    var d=((theta-phi)%180+180)%180; return Math.min(d,180-d)<0.5;
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H); ctx.fillStyle="#12100d"; ctx.fillRect(0,0,W,H);
+    // ring
+    ctx.strokeStyle="rgba(224,138,106,0.14)"; ctx.lineWidth=1.4; ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.stroke();
+    // the axis line
+    var ar=phi*Math.PI/180; var ax=Math.cos(ar)*(R+40), ay=Math.sin(ar)*(R+40);
+    ctx.strokeStyle="rgba(216,178,74,0.55)"; ctx.lineWidth=1.6; ctx.setLineDash([6,5]);
+    ctx.beginPath();ctx.moveTo(cx-ax,cy-ay);ctx.lineTo(cx+ax,cy+ay);ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#d8b24a"; ctx.font="italic 12px Newsreader,serif"; ctx.fillText("axis φ = "+Math.round(phi)+"°", cx+ax*0.7, cy+ay*0.7-6);
+    // pairing chords (base → image)
+    ctx.strokeStyle="rgba(127,176,200,0.28)"; ctx.lineWidth=1;
+    for(var i=0;i<N;i++){ var a=pos(pts[i]), b=pos(reflect(pts[i])); ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke(); }
+    // the two fixed points of the reflection: where axis meets the ring
+    var fixed=[phi, (phi+180)%360];
+    fixed.forEach(function(fd){ var p=pos(fd); ctx.save(); ctx.translate(p[0],p[1]); ctx.rotate(Math.PI/4);
+      ctx.fillStyle="rgba(216,178,74,0.9)"; ctx.fillRect(-6,-6,12,12); ctx.strokeStyle="#d8b24a"; ctx.lineWidth=1.5; ctx.strokeRect(-6,-6,12,12); ctx.restore();
+    });
+    // moving points
+    var pairsSwapped=0;
+    for(var j=0;j<N;j++){
+      var showAng = flipped? reflect(pts[j]) : pts[j];
+      var p=pos(showAng), fix=nearFixed(pts[j]);
+      ctx.beginPath();ctx.arc(p[0],p[1], fix?7:6, 0,7);
+      ctx.fillStyle= fix? "rgba(216,178,74,0.9)" : "#f0a886"; ctx.fill();
+      ctx.strokeStyle= fix? "#d8b24a":"#cc785c"; ctx.lineWidth=1.4; ctx.stroke();
+    }
+    // count swapped pairs (non-fixed points / 2)
+    var nf=0; for(var k=0;k<N;k++) if(!nearFixed(pts[k])) nf++; pairsSwapped=Math.round(nf/2);
+    var nfix=N-nf;
+    // fixed-point label
+    ctx.fillStyle="#d8b24a"; ctx.font="11px 'JetBrains Mono',monospace"; ctx.textAlign="center";
+    ctx.fillText("不動点 · fixed", cx, cy-R-24); ctx.textAlign="left";
+    // centre counter
+    ctx.fillStyle= (count%2===0)? "#6fbf8a":"#e08a6a"; ctx.font="700 16px 'JetBrains Mono',monospace"; ctx.textAlign="center";
+    ctx.fillText(count%2===0? "f applied "+count+"× — identity":"f applied "+count+"× — reflected", cx, cy+4);
+    ctx.textAlign="left";
+    phiVal.textContent=Math.round(phi)+"°";
+    readout.innerHTML="the ring: <b>"+pairsSwapped+" swapped pairs</b> + <span class='go'>2 fixed points</span> (on the axis). "+
+      (count===0? "Press <b>apply</b> and the pairs cross the axis; press again and they cross back — <span class='g'>f∘f = identity</span>." :
+       (count%2===0? "Applied "+count+" times — an even number — so we are exactly <span class='g'>home</span>. Twice-applied, the involution is nothing." :
+        "Applied "+count+" times — reflected. One more application returns every point. The two <span class='go'>不動点</span> never moved at all."));
+  }
+  phiEl.oninput=function(){ phi=parseFloat(phiEl.value); draw(); };
+  document.getElementById("apply").onclick=function(){ flipped=!flipped; count++; draw(); };
+  document.getElementById("reset").onclick=function(){ flipped=false; count=0; phi=30; phiEl.value=30; draw(); };
+  var DPR=Math.min(2,window.devicePixelRatio||1); var w=cv.width,h=cv.height; cv.width=w*DPR;cv.height=h*DPR;cv.style.aspectRatio=w+'/'+h; ctx.scale(DPR,DPR); W=w;H=h;cx=W/2;cy=H/2;
+  draw();
+})();
+</script>
+</body>
+</html>
